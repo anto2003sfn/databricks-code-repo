@@ -1,0 +1,14 @@
+{
+  "dev": {
+    "catalog": "dev_catalog",
+    "source_path": "/mnt/data/dev/raw/",
+    "compute_size": "small",
+    "schema":"dev_schema"
+  },
+  "prod": {
+    "catalog": "prod_catalog",
+    "source_path": "/mnt/data/prod/raw/",
+    "compute_size": "large",
+    "schema":"prod_schema"
+  }
+}
