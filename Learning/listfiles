@@ -1,0 +1,27 @@
+total 8610
+-rwxrwxrwx 1 root root   20573 Dec 27 02:06 2-Advanced-Readops.ipynb
+-rwxrwxrwx 1 root root   12002 Jan  1 16:06 DBFS_2_DF_Widgets.ipynb
+-rwxrwxrwx 1 root root   10540 Jan  1 16:06 3_Curation_Notebook 2025-12-24 07:28:19.ipynb
+-rwxrwxrwx 1 root root   13398 Jan  7 02:01 3_Bread_n_Butter_Transformation_Analytical_Operations.ipynb
+-rwxrwxrwx 1 root root 8552357 Jan 15 13:34 logistics_project.png
+-rwxrwxrwx 1 root root   30433 Jan 19 03:31 BB2_Usecase2_DSL_SQL.ipynb
+-rwxrwxrwx 1 root root    7474 Jan 19 03:31 date_functions in spark.ipynb
+-rwxrwxrwx 1 root root    2590 Jan 19 03:31 python_logger_implementaion.ipynb
+-rwxrwxrwx 1 root root   11205 Jan 19 03:31 pipeline_sample.ipynb
+-rwxrwxrwx 1 root root   17548 Jan 19 03:31 join_operations.ipynb
+-rwxrwxrwx 1 root root    4910 Jan 19 03:31 streaming_log_listner.ipynb
+-rwxrwxrwx 1 root root    8950 Jan 19 03:31 windowing_functions.ipynb
+-rwxrwxrwx 1 root root    1629 Jan 23 08:10 02_read_CSV_Merge_Schema_.ipynb
+-rwxrwxrwx 1 root root    5712 Feb 13 04:33 05_import_package_from_parent_to_child_notbook.ipynb
+-rwxrwxrwx 1 root root    3035 Feb 13 04:54 05_parent_notbook.ipynb
+-rwxrwxrwx 1 root root    4326 Feb 13 04:54 transformataion_example.ipynb
+-rwxrwxrwx 1 root root    3275 Feb 13 04:54 StreamingQueryListener.ipynb
+-rwxrwxrwx 1 root root   65059 Feb 13 04:54 4_usecase_logistic.ipynb
+-rwxrwxrwx 1 root root       0 Feb 13 05:00 listfiles
+drwxrwxrwx 2 root root    4096 Feb 13 05:00 retailLogistics_usecase
+drwxrwxrwx 2 root root    4096 Feb 13 05:00 Passing_parameters_from_task_2_task
+drwxrwxrwx 2 root root    4096 Feb 13 05:00 optimization_techniques
+drwxrwxrwx 2 root root    4096 Feb 13 05:00 etl_pipeline_creation
+drwxrwxrwx 2 root root    4096 Feb 13 05:00 delta_sharing
+drwxrwxrwx 2 root root    4096 Feb 13 05:00 decorator_concepts
+-rwxrwxrwx 1 root root   11179 Feb 13 05:00 1-Basic-Readops.ipynb
