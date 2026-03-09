@@ -1,12 +1,11 @@
 resources:
   jobs:
-    dab_project_job:
-      name: dab_project_job
+    retail_etl_scheduling_pipeline:
+      name: retail_etl_scheduling_pipeline
       tasks:
-        - task_key: dab_job
-          notebook_task:
-            notebook_path: ../src/dab_notebook.ipynb
-            source: WORKSPACE
+        - task_key: retail_actuals
+          pipeline_task:
+            pipeline_id: c17f425b-89fb-4742-a039-59f0e7229c8d
       queue:
         enabled: true
       parameters:

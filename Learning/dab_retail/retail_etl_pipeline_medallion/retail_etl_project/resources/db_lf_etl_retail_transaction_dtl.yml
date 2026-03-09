@@ -1,0 +1,15 @@
+resources:
+  pipelines:
+    pipeline_db_lf_etl_retail_transaction_dtl:
+      name: db_lf_etl_retail_transaction_dtl
+      libraries:
+        - glob:
+            include: ../src/retail_etl_pipeline/transformations/**
+      schema: default
+      continuous: false
+      development: false
+      photon: true
+      channel: CURRENT
+      catalog: workspace
+      serverless: true
+      root_path: /Workspace/Users/anto2003.sfn@gmail.com/databricks-code-repo/Learning/dab_retail/retail_etl_pipeline_medallion/retail_etl_project/src/retail_etl_pipeline

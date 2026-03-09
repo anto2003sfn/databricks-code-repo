@@ -1,0 +1,42 @@
+# This is a Databricks asset bundle definition for retail_acutals.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: retail_acutals
+  uuid: 2266b178-6329-4184-900f-4f3f3320e9f4
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev my_user_name]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-fe14ef4e-96da.cloud.databricks.com/
+    variables:
+      catalog: retail
+      schema: schema_retail
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-fe14ef4e-96da.cloud.databricks.com/
+      # We explicitly deploy to /Workspace/Users/anto2003.sfn@gmail.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/anto2003.sfn@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: retail
+      schema: schema_retail
+    permissions:
+      - user_name: anto2003.sfn@gmail.com
+        level: CAN_MANAGE

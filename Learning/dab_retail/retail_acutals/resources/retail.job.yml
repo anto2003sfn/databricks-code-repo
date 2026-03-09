@@ -1,0 +1,23 @@
+resources:
+  jobs:
+    retail_ftl:
+      name: retail_ftl
+      tasks:
+        - task_key: retail_acutals_task
+          notebook_task:
+            notebook_path: ../src/retail_actuals_nb.ipynb
+            source: WORKSPACE
+        - task_key: retail_forecast_task
+          depends_on:
+            - task_key: retail_acutals_task
+          notebook_task:
+            notebook_path: ../src/retail_actuals_nb.ipynb
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: catalog
+          default: "${var.catalog}"
+        - name: schema
+          default: "${var.schema}"
+      performance_target: PERFORMANCE_OPTIMIZED

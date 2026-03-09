@@ -1,3 +1,3 @@
-from pyspark import pipelines as P
-@P.table()
+from pyspark import pipelines as dp
+@dp.table(name="retail")
 
