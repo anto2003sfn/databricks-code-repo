@@ -1,0 +1,40 @@
+{
+
+  "name": "clinical-fhir-sdp-volume-dev",
+
+  "catalog": "hla",
+
+  "target": "clinical_sdp_dev",
+
+  "development": true,
+
+  "continuous": true,
+
+  "channel": "CURRENT",
+
+  "serverless": false,
+
+  "photon": true,
+
+  "libraries": [
+
+    {"notebook": {"path": "/Workspace/Users/celin.mary@blackstraw.ai/BlackStraw/HLA/RPM/Streaming_Processing/SDP/01_bronze_event_hubs"}},
+
+    {"notebook": {"path": "/Workspace/Users/celin.mary@blackstraw.ai/BlackStraw/HLA/RPM/Streaming_Processing/SDP/02_normalize_fhir_r4"}},
+
+    {"notebook": {"path": "/Workspace/Users/celin.mary@blackstraw.ai/BlackStraw/HLA/RPM/Streaming_Processing/SDP/03_validate_fhir_r4"}}
+
+  ],
+
+  "configuration": {
+
+    "clinical.repo_root": "/Workspace/Users/celin.mary@blackstraw.ai/BlackStraw/HLA/RPM/Streaming_Processing",
+
+    "pipelines.trigger.interval": "30 seconds"
+
+  },
+
+  "notes": "Runtime defaults come from config/uc_environment.yaml (sdp.stream_source=volume, paths, EH). Set clinical.repo_root to the workspace folder that contains config/. Optional clinical.* keys override YAML. Land files with land_synthetic_clinical_raw.py or scripts/stream_synthetic_to_landing.py."
+
+}
+
