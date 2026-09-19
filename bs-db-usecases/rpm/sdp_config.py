@@ -12,7 +12,7 @@ module instead of running `00_config` as a notebook.
 - any `clinical.*` / `phase3.*` path or Event Hubs key
 """
 
-from __future__ import annotations
+# from __future__ import annotations
 
 import json
 import sys
@@ -45,7 +45,6 @@ __all__ = [
 
 def _active_spark():
     from pyspark.sql import SparkSession
-
     return SparkSession.getActiveSession() or SparkSession.builder.getOrCreate()
 
 
@@ -92,12 +91,15 @@ def _workspace_path(path: str) -> str:
 
 def _candidate_repo_roots() -> list[str]:
     roots: list[str] = []
-    conf_root = _conf("clinical.repo_root", "phase3.repo_root", default="")
+    conf_root = _conf("clinical.repo_root", "rpm.databricks-code-repo", default="")
     if conf_root:
         roots.append(_workspace_path(conf_root))
     # This module lives at <repo_root>/SDP/sdp_config.py
-    roots.append(str(Path(__file__).resolve().parents[1]).replace("\\", "/"))
-    roots.append("/Workspace/Users/celin.mary@blackstraw.ai/BlackStraw/HLA/RPM/Streaming_Processing")
+    try:
+        roots.append(str(Path(__file__).resolve().parents[1]).replace("\\", "/"))
+    except NameError:
+        pass
+    roots.append("/Workspace/Users/anto2003.sfn@gmail.com/databricks-code-repo/bs-db-usecases/rpm")
     seen: set[str] = set()
     out: list[str] = []
     for r in roots:
@@ -109,7 +111,7 @@ def _candidate_repo_roots() -> list[str]:
 
 
 def _resolve_yaml_path() -> str:
-    explicit = _conf("clinical.uc_yaml_path", "phase3.uc_yaml_path", default="")
+    explicit = _conf("clinical.uc_yaml_path", "rpm.uc_yaml_path", default="")
     if explicit:
         return _workspace_path(explicit)
     for root in _candidate_repo_roots():
@@ -126,12 +128,11 @@ def _load_yaml_cfg() -> dict:
         sys.path.insert(0, repo_for_import)
     try:
         from config.uc_naming import load_uc_yaml
-
         cfg = load_uc_yaml(yaml_path)
-        print(f"[Phase3 SDP] loaded yaml={yaml_path}")
+        print(f"[rpm] loaded yaml={yaml_path}")
         return cfg if isinstance(cfg, dict) else {}
     except Exception as exc:
-        print(f"[Phase3 SDP] yaml not loaded ({exc}); using conf/defaults only")
+        print(f"[rpm] yaml not loaded ({exc}); using conf/defaults only")
         return {}
 
 
@@ -282,16 +283,16 @@ def event_hubs_options() -> dict[str, str]:
 
 def describe() -> None:
     print(
-        f"[Phase3 SDP] catalog={catalog} domain={domain} env={env} "
+        f"[rpm] catalog={catalog} domain={domain} env={env} "
         f"stream_source={stream_source} ref={ref_schema} repo_root={repo_root}"
     )
     if stream_source == "volume":
         print(
-            f"[Phase3 SDP] inbox={raw_inbox_path} schema={autoloader_schema_path} "
+            f"[rpm] inbox={raw_inbox_path} schema={autoloader_schema_path} "
             f"listing_interval={autoloader_listing_interval}"
         )
     else:
-        print(f"[Phase3 SDP] hub={eh_hub} cg={eh_consumer_group}")
+        print(f"[rpm] hub={eh_hub} cg={eh_consumer_group}")
 
 
 describe()

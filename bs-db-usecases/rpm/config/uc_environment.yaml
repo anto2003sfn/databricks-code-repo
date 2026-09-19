@@ -1,0 +1,72 @@
+# Unity Catalog + workspace parameters for Phase3 (FHIR streaming + EHR batch).
+# Source of truth for bootstrap widgets / SDP spark.conf / job base_parameters.
+# Override per environment by copying this file or passing widgets at run time.
+#
+# Naming standard (industry / UC medallion):
+#   schema  = {catalog}.{domain}_{layer}_{env}
+#   volume  = {catalog}.{ops_schema}.{volume_name}
+#   path    = /Volumes/{catalog}/{ops_schema}/{volume_name}/...
+#
+# domain = business capability (clinical), NOT delivery phase (avoid p2/p3 in new estates).
+# Legacy estates that already created p3_* schemas: set domain: p3
+
+catalog: hla
+env: dev
+domain: clinical
+
+# Workspace repo root (CSV seeds / samples only — no Python UDF package required)
+repo_root: /Workspace/Users/anto2003.sfn@gmail.com/databricks-code-repo/bs-db-usecases/rpm
+
+# Optional: land approved mapping CSVs on a Volume in prod (overrides repo_root seeds)
+mapping_seed_path: ""          # e.g. /Volumes/hla/landing/config/fhir_mapping_seed.csv
+resource_mapping_seed_path: ""
+ehr_input_path: ""             # e.g. /Volumes/hla/landing/ehr/cle
+
+# Medallion + control-plane layers → schema short names
+layers:
+  ref: ref          # governed mapping / EHR control plane
+  bronze: bronze
+  silver: silver
+  gold: gold
+  sdp: sdp          # Declarative Pipeline target schema (isolated)
+
+# Ops schemas + volumes (created by notebooks/00_uc_bootstrap.py)
+ops:
+  checkpoints_schema: ops
+  checkpoints_volume: checkpoints
+  landing_schema: landing
+  landing_ehr_volume: ehr
+  landing_config_volume: config
+  # Derived paths (bootstrap also prints these):
+  #   /Volumes/{catalog}/ops/checkpoints/{domain}_spark_ss/{env}
+  #   /Volumes/{catalog}/ops/checkpoints/{domain}_sdp/{env}
+  #   /Volumes/{catalog}/landing/ehr/{source}          e.g. .../ehr/cle
+  #   /Volumes/{catalog}/landing/config
+
+# Azure Event Hubs (direct connector — not Kafka endpoint)
+event_hubs:
+  namespace: hla-eh-poc
+  hub: hla-events
+  secret_scope: hla
+  secret_key: eventhub-listen-conn-str
+  consumer_group_spark_ss: clinical-fhir-ss-dev
+  consumer_group_sdp: clinical-fhir-sdp-dev
+  starting_position: earliest
+  max_events_per_trigger: "50000"
+  event_type_filter: CLINICAL_STANDARDS_EVENT
+
+# SDP pipeline identity
+sdp:
+  pipeline_name: clinical-fhir-sdp-dev
+  continuous: false
+  photon: true
+
+# Schemas created when bootstrap dry_run=false
+create_schemas:
+  - ref
+  - bronze
+  - silver
+  - gold
+  - sdp
+
+create_ops_volumes: true

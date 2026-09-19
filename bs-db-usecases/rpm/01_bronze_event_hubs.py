@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "5"
+# ///
 # MAGIC %md
 # MAGIC # Phase3 · SDP · 01 Bronze
 # MAGIC
@@ -11,6 +15,7 @@
 # MAGIC `event_hubs` when the hub + secret + connector are ready. No Python UDF.
 
 # COMMAND ----------
+
 # Declarative Pipelines ignore %run, so shared config is loaded as a module.
 import importlib.util
 import os
@@ -20,7 +25,7 @@ from pathlib import Path
 
 def load_sdp_config():
     candidates = []
-    for key in ("clinical.repo_root", "phase3.repo_root"):
+    for key in ("clinical.repo_root", "rpm.databricks-code-repo"):
         try:
             value = spark.conf.get(key)
         except Exception:
@@ -28,38 +33,46 @@ def load_sdp_config():
         if value and value.strip():
             candidates.append(value.strip())
     here = Path(os.getcwd())
-    candidates += [str(here), str(here.parent), "/Workspace/Users/celin.mary@blackstraw.ai/BlackStraw/HLA/RPM/Streaming_Processing"]
+    candidates += [str(here), str(here.parent), "/Workspace/Users/anto2003.sfn@gmail.com/databricks-code-repo/bs-db-usecases/rpm"]
     for raw in candidates:
         root = raw.rstrip("/").replace("\\", "/")
         if root.startswith(("/Repos/", "/Users/", "/Shared/")):
             root = f"/Workspace{root}"
-        module_file = Path(root, "SDP", "sdp_config.py")
+        module_file = Path(root, "rpm", "sdp_config.py")
         if module_file.is_file():
             if root not in sys.path:
                 sys.path.insert(0, root)
             spec = importlib.util.spec_from_file_location(
-                "phase3_sdp_config", str(module_file)
+                "rpm_config", str(module_file)
             )
             module = importlib.util.module_from_spec(spec)
             sys.modules[spec.name] = module
             spec.loader.exec_module(module)
             return module
     raise RuntimeError(
-        "SDP/sdp_config.py not found (it must exist as a workspace FILE, not a "
+        "rpm/sdp_config.py not found (it must exist as a workspace FILE, not a "
         "notebook). Set pipeline configuration clinical.repo_root to the folder "
-        "that contains config/ and SDP/. Looked under: " + ", ".join(candidates)
+        "that contains config/ and rpm/. Looked under: " + ", ".join(candidates)
     )
 
 
 cfg = load_sdp_config()
 stream_source = cfg.stream_source
+
 event_type_filter = cfg.event_type_filter
 raw_inbox_path = cfg.raw_inbox_path
 autoloader_schema_path = cfg.autoloader_schema_path
 autoloader_listing_interval = cfg.autoloader_listing_interval
 event_hubs_options = cfg.event_hubs_options
+# print(cfg)
+# print('autoloader_schema_path',autoloader_schema_path)
+# print('autoloader_listing_interval',autoloader_listing_interval)
+# print('event_hubs_options',event_hubs_options)
 
 # COMMAND ----------
+
+
+
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
@@ -234,3 +247,106 @@ def clinical_raw_events():
         "Use event_hubs (prod) or volume (temporary offline demo)."
     )
 
+# COMMAND ----------
+
+
+
+from pyspark import pipelines as dp
+from pyspark.sql import functions as F
+
+# Import modules
+from pyspark import pipelines as dp
+from pyspark.sql.functions import *
+from pyspark.sql.types import DoubleType, IntegerType, StringType, StructType, StructField
+
+# Define the path to the source data
+file_path = f"/databricks-datasets/songs/data-001/"
+
+# Define a streaming table to ingest data from a volume
+schema = StructType(
+  [
+    StructField("artist_id", StringType(), True),
+    StructField("artist_lat", DoubleType(), True),
+    StructField("artist_long", DoubleType(), True),
+    StructField("artist_location", StringType(), True),
+    StructField("artist_name", StringType(), True),
+    StructField("duration", DoubleType(), True),
+    StructField("end_of_fade_in", DoubleType(), True),
+    StructField("key", IntegerType(), True),
+    StructField("key_confidence", DoubleType(), True),
+    StructField("loudness", DoubleType(), True),
+    StructField("release", StringType(), True),
+    StructField("song_hotnes", DoubleType(), True),
+    StructField("song_id", StringType(), True),
+    StructField("start_of_fade_out", DoubleType(), True),
+    StructField("tempo", DoubleType(), True),
+    StructField("time_signature", DoubleType(), True),
+    StructField("time_signature_confidence", DoubleType(), True),
+    StructField("title", StringType(), True),
+    StructField("year", IntegerType(), True),
+    StructField("partial_sequence", IntegerType(), True)
+  ]
+)
+
+@dp.table(
+  comment="Raw data from a subset of the Million Song Dataset; a collection of features and metadata for contemporary music tracks."
+)
+def songs_raw():
+  return (spark.readStream
+    .format("cloudFiles")
+    .schema(schema)
+    .option("cloudFiles.format", "csv")
+    .option("sep","\t")
+    .load(file_path))
+
+# Define a materialized view that validates data and renames a column
+@dp.materialized_view(
+  comment="Million Song Dataset with data cleaned and prepared for analysis."
+)
+@dp.expect("valid_artist_name", "artist_name IS NOT NULL")
+@dp.expect("valid_title", "song_title IS NOT NULL")
+@dp.expect("valid_duration", "duration > 0")
+def songs_prepared():
+  return (
+    spark.read.table("songs_raw")
+      .withColumnRenamed("title", "song_title")
+      .select("artist_id", "artist_name", "duration", "release", "tempo", "time_signature", "song_title", "year")
+  )
+
+# Define a materialized view that has a filtered, aggregated, and sorted view of the data
+@dp.materialized_view(
+  comment="A table summarizing counts of songs released by the artists who released the most songs each year."
+)
+def top_artists_by_year():
+  return (
+    spark.read.table("songs_prepared")
+      .filter(expr("year > 0"))
+      .groupBy("artist_name", "year")
+      .count().withColumnRenamed("count", "total_number_of_songs")
+      .sort(desc("total_number_of_songs"), desc("year"))
+  )
+
+
+
+
+# @dp.table(
+#     name="clinical_raw_events",
+#     comment="Phase3 Bronze: Event Hubs (prod) or volume Autoloader (temporary offline)",
+#     table_properties={
+#         "quality": "bronze",
+#         "delta.enableChangeDataFeed": "true",
+#     },
+# )
+
+# @dp.expect_or_drop("has_payload", "value_str IS NOT NULL AND length(value_str) > 0")
+# @dp.expect("has_source_format", "source_format IS NOT NULL")
+# @dp.expect("has_device_key", "device_key IS NOT NULL")
+# def clinical_raw_events():
+#     if stream_source == "event_hubs":
+#         return _bronze_from_event_hubs()
+#     if stream_source == "volume":
+#         return _bronze_from_volume()
+#     raise ValueError(
+#         f"Unknown clinical.stream_source={stream_source!r}. "
+#         "Use event_hubs (prod) or volume (temporary offline demo)."
+#     )
